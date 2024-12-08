@@ -76,18 +76,6 @@ def change_background_image(image_path):
 change_bird_image(1)
 change_background_image('background.png')
 
-# Add a variable to track control mode
-automation_mode = False
-
-# Function to automate bird movement
-def automate_bird(bird_y, pipes):
-    """Automate the bird's movement to avoid pipes."""
-    for pipe in pipes:
-        if pipe.x > bird_x and pipe.x < bird_x + PIPE_WIDTH:
-            if bird_y > pipe.y + PIPE_GAP / 2:
-                return FLAP_STRENGTH
-    return bird_velocity
-
 # Functions
 def create_pipe():
     """Create a new pipe with a random gap position."""
@@ -130,9 +118,7 @@ def flappygame():
                 running = False
             
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    automation_mode = not automation_mode
-                if event.key == pygame.K_SPACE and not game_over and not automation_mode:
+                if event.key == pygame.K_SPACE and not game_over:
                     bird_velocity = FLAP_STRENGTH  # Flap the bird
                 if event.key == pygame.K_SPACE and game_over:
                     # Restart the game
@@ -150,8 +136,6 @@ def flappygame():
 
         if not game_over:
             # Bird movement
-            if automation_mode:
-                bird_velocity = automate_bird(bird_y, pipe_list)
             bird_velocity += GRAVITY
             bird_y += bird_velocity
 
