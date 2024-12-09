@@ -14,9 +14,8 @@ FPS = 60
 GRAVITY = 0.3
 FLAP_POWER = -5.5
 PIPE_SPEED = 2.5
-PIPE_GAP = 140  # Decreased vertical gap between pipes
+PIPE_GAP = 160
 PIPE_FREQUENCY = 2000  # Time in milliseconds between pipe spawns
-PIPE_HORIZONTAL_GAP = WINDOW_WIDTH/3  # Decreased horizontal gap between pipe pairs
 
 # Colors
 WHITE = (255, 255, 255)
@@ -29,110 +28,42 @@ def create_programmatic_images():
     """Create game images programmatically"""
     images = {}
     
-    # Try to load bird image, create simple one if not found
-    bird_path = os.path.join('images', 'bird1.png')
-    try:
-        if os.path.exists(bird_path):
-            bird_image = pygame.image.load(bird_path).convert_alpha()
-            # Scale bird image to proper size
-            bird_width = 40
-            bird_height = 30
-            images['flappybird'] = pygame.transform.scale(bird_image, (bird_width, bird_height))
-        else:
-            # Create simple bird surface
-            bird_surface = pygame.Surface((40, 30), pygame.SRCALPHA)
-            pygame.draw.ellipse(bird_surface, BIRD_YELLOW, (0, 0, 40, 30))
-            pygame.draw.ellipse(bird_surface, (200, 160, 0), (0, 0, 40, 30), 2)  # Outline
-            pygame.draw.circle(bird_surface, BLACK, (30, 12), 3)  # Eye
-            images['flappybird'] = bird_surface
-    except pygame.error:
-        # Fallback to simple bird if image loading fails
-        bird_surface = pygame.Surface((40, 30), pygame.SRCALPHA)
-        pygame.draw.ellipse(bird_surface, BIRD_YELLOW, (0, 0, 40, 30))
-        pygame.draw.ellipse(bird_surface, (200, 160, 0), (0, 0, 40, 30), 2)
-        pygame.draw.circle(bird_surface, BLACK, (30, 12), 3)
-        images['flappybird'] = bird_surface
+    # Create bird surface
+    bird_surface = pygame.Surface((40, 30), pygame.SRCALPHA)
+    pygame.draw.ellipse(bird_surface, BIRD_YELLOW, (0, 0, 40, 30))
+    pygame.draw.ellipse(bird_surface, (200, 160, 0), (0, 0, 40, 30), 2)  # Outline
+    pygame.draw.circle(bird_surface, BLACK, (30, 12), 3)  # Eye
+    images['flappybird'] = bird_surface
     
-    # Try to load pipe image, create simple one if not found
-    pipe_path = os.path.join('images', 'pipe.png')
-    try:
-        if os.path.exists(pipe_path):
-            pipe_image = pygame.image.load(pipe_path).convert_alpha()
-            # Scale pipe image to proper size
-            pipe_height = 500
-            pipe_width = 80
-            pipe_image = pygame.transform.scale(pipe_image, (pipe_width, pipe_height))
-            images['pipeimage'] = (
-                pygame.transform.rotate(pipe_image, 180),  # Upper pipe
-                pipe_image  # Lower pipe
-            )
-        else:
-            # Create simple pipe surface
-            pipe_surface = pygame.Surface((80, 500), pygame.SRCALPHA)
-            pygame.draw.rect(pipe_surface, PIPE_GREEN, (0, 0, 80, 500))
-            pygame.draw.rect(pipe_surface, (50, 150, 50), (0, 0, 80, 500), 3)  # Darker outline
-            pygame.draw.rect(pipe_surface, (90, 190, 90), (5, 0, 70, 30))  # Pipe top
-            images['pipeimage'] = (
-                pipe_surface,  # Original pipe for bottom
-                pygame.transform.flip(pipe_surface, False, True)  # Flipped pipe for top
-            )
-    except pygame.error:
-        # Fallback to simple pipe if image loading fails
-        pipe_surface = pygame.Surface((80, 500), pygame.SRCALPHA)
-        pygame.draw.rect(pipe_surface, PIPE_GREEN, (0, 0, 80, 500))
-        pygame.draw.rect(pipe_surface, (50, 150, 50), (0, 0, 80, 500), 3)
-        pygame.draw.rect(pipe_surface, (90, 190, 90), (5, 0, 70, 30))
-        images['pipeimage'] = (
-            pipe_surface,
-            pygame.transform.flip(pipe_surface, False, True)
-        )
+    # Create pipe surface
+    pipe_surface = pygame.Surface((80, 500), pygame.SRCALPHA)
+    pygame.draw.rect(pipe_surface, PIPE_GREEN, (0, 0, 80, 500))
+    pygame.draw.rect(pipe_surface, (50, 150, 50), (0, 0, 80, 500), 3)  # Darker outline
+    pygame.draw.rect(pipe_surface, (90, 190, 90), (5, 0, 70, 30))  # Pipe top
+    images['pipeimage'] = (
+        pipe_surface,  # Original pipe for bottom
+        pygame.transform.flip(pipe_surface, False, True)  # Flipped pipe for top
+    )
     
-    # Try to load background image, create simple one if not found
-    bg_path = os.path.join('images', 'background.png')
-    try:
-        if os.path.exists(bg_path):
-            bg_image = pygame.image.load(bg_path).convert()
-            images['background'] = pygame.transform.scale(bg_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
-        else:
-            # Create simple background
-            bg_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-            bg_surface.fill(SKY_BLUE)
-            # Add some simple clouds
-            for _ in range(5):
-                x = random.randint(0, WINDOW_WIDTH)
-                y = random.randint(0, WINDOW_HEIGHT//2)
-                pygame.draw.ellipse(bg_surface, WHITE, (x, y, 60, 30))
-            images['background'] = bg_surface
-    except pygame.error:
-        # Fallback to simple background if image loading fails
-        bg_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-        bg_surface.fill(SKY_BLUE)
-        images['background'] = bg_surface
+    # Create background
+    bg_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+    bg_surface.fill(SKY_BLUE)
+    # Add some simple clouds
+    for _ in range(5):
+        x = random.randint(0, WINDOW_WIDTH)
+        y = random.randint(0, WINDOW_HEIGHT//2)
+        pygame.draw.ellipse(bg_surface, WHITE, (x, y, 60, 30))
+    images['background'] = bg_surface
     
-    # Try to load ground image, create simple one if not found
-    ground_path = os.path.join('images', 'sea_level.png')
-    try:
-        if os.path.exists(ground_path):
-            ground_image = pygame.image.load(ground_path).convert_alpha()
-            images['sea_level'] = pygame.transform.scale(
-                ground_image,
-                (WINDOW_WIDTH, int(WINDOW_HEIGHT - ELEVATION))
-            )
-        else:
-            # Create simple ground
-            ground_surface = pygame.Surface((WINDOW_WIDTH, int(WINDOW_HEIGHT - ELEVATION)))
-            ground_surface.fill((210, 180, 140))  # Sandy color
-            # Add some texture
-            for _ in range(20):
-                x = random.randint(0, WINDOW_WIDTH)
-                y = random.randint(0, int(WINDOW_HEIGHT - ELEVATION))
-                pygame.draw.circle(ground_surface, (180, 150, 120), (x, y), 3)
-            images['sea_level'] = ground_surface
-    except pygame.error:
-        # Fallback to simple ground if image loading fails
-        ground_surface = pygame.Surface((WINDOW_WIDTH, int(WINDOW_HEIGHT - ELEVATION)))
-        ground_surface.fill((210, 180, 140))
-        images['sea_level'] = ground_surface
+    # Create ground
+    ground_surface = pygame.Surface((WINDOW_WIDTH, int(WINDOW_HEIGHT - ELEVATION)))
+    ground_surface.fill((210, 180, 140))  # Sandy color
+    # Add some texture
+    for _ in range(20):
+        x = random.randint(0, WINDOW_WIDTH)
+        y = random.randint(0, int(WINDOW_HEIGHT - ELEVATION))
+        pygame.draw.circle(ground_surface, (180, 150, 120), (x, y), 3)
+    images['sea_level'] = ground_surface
     
     return images
 
@@ -151,7 +82,7 @@ game_images = create_programmatic_images()
 def create_pipe():
     """Creates a new pair of pipes"""
     pipe_height = game_images['pipeimage'][0].get_height()
-    gap_y = random.randrange(150, WINDOW_HEIGHT - PIPE_GAP - 100)  # Adjusted range for closer gaps
+    gap_y = random.randrange(150, WINDOW_HEIGHT - PIPE_GAP - 150)  # Adjusted range for better gaps
     pipe_x = WINDOW_WIDTH + 10
     
     pipe = [
@@ -207,8 +138,8 @@ def flappy_game():
     # Create first two pipes
     first_pipe = create_pipe()
     second_pipe = create_pipe()
-    second_pipe[0]['x'] = first_pipe[0]['x'] + PIPE_HORIZONTAL_GAP  # Use new horizontal gap
-    second_pipe[1]['x'] = first_pipe[1]['x'] + PIPE_HORIZONTAL_GAP
+    second_pipe[0]['x'] = first_pipe[0]['x'] + WINDOW_WIDTH/2
+    second_pipe[1]['x'] = first_pipe[1]['x'] + WINDOW_WIDTH/2
     
     # List of pipes
     up_pipes = [first_pipe[0], second_pipe[0]]
@@ -353,3 +284,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
